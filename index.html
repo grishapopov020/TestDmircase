@@ -197,6 +197,7 @@
         
         // Текущий выбранный пользователь
         let currentUserKey = null;
+        let currentUserData = null;
         
         // Функция для проверки существования пользователя
         async function checkUser() {
@@ -221,6 +222,7 @@
                 for (const key in users) {
                     if (users[key] && users[key].Name && users[key].Name.toLowerCase() === nickname.toLowerCase()) {
                         currentUserKey = key;
+                        currentUserData = users[key];
                         displayUserInfo(users[key]);
                         userFound = true;
                         break;
@@ -264,21 +266,28 @@
             // Добавляем дополнительные параметры для идентификации платежа
             const nickname = document.createElement('input');
             nickname.type = 'hidden';
-            nickname.name = 'nickname';
+            nickname.name = 'label';
             nickname.value = nicknameInput.value.trim();
             paymentForm.appendChild(nickname);
             
             const currencyType = document.createElement('input');
             currencyType.type = 'hidden';
-            currencyType.name = 'currencyType';
+            currencyType.name = 'currency';
             currencyType.value = currencyTypeSelect.value;
             paymentForm.appendChild(currencyType);
             
-            const amount = document.createElement('input');
-            amount.type = 'hidden';
-            amount.name = 'amount';
-            amount.value = amountInput.value;
-            paymentForm.appendChild(amount);
+            // Добавляем URL для возврата
+            const returnUrl = document.createElement('input');
+            returnUrl.type = 'hidden';
+            returnUrl.name = 'quickpay-form';
+            returnUrl.value = 'shop';
+            paymentForm.appendChild(returnUrl);
+            
+            const successUrl = document.createElement('input');
+            successUrl.type = 'hidden';
+            successUrl.name = 'successURL';
+            successUrl.value = window.location.href.split('?')[0] + '?success=1&nickname=' + encodeURIComponent(nicknameInput.value.trim());
+            paymentForm.appendChild(successUrl);
             
             // Добавляем стандартные элементы формы ЮKassa
             const paymentBlock = document.createElement('div');
@@ -343,29 +352,59 @@
             const script = document.createElement('script');
             script.src = 'https://yookassa.ru/integration/simplepay/js/yookassa_construct_form.js?v=1.25.0';
             document.body.appendChild(script);
-            
-            // Обработка успешной оплаты
-            script.onload = function() {
-                // Здесь можно добавить обработку успешной оплаты
-                // Например, слушать изменения в базе данных для этого пользователя
-                if (currentUserKey) {
-                    const userRef = database.ref(currentUserKey);
-                    
-                    userRef.on('value', (snapshot) => {
-                        const user = snapshot.val();
-                        if (user) {
-                            infoGold.textContent = user.Gold || '0';
-                            infoCoin.textContent = user.Coin || '0';
-                        }
-                    });
+        }
+        
+        // Функция для начисления валюты
+        async function addCurrency(nickname, currencyType, amount) {
+            try {
+                // Находим пользователя в базе
+                const snapshot = await database.ref().once('value');
+                const users = snapshot.val();
+                
+                for (const key in users) {
+                    if (users[key] && users[key].Name && users[key].Name.toLowerCase() === nickname.toLowerCase()) {
+                        // Получаем текущее значение валюты
+                        const currentValue = parseFloat(users[key][currencyType] || 0);
+                        const newValue = currentValue + parseFloat(amount);
+                        
+                        // Обновляем значение в базе данных
+                        await database.ref(key + '/' + currencyType).set(newValue);
+                        
+                        return true;
+                    }
                 }
-            };
+                return false;
+            } catch (error) {
+                console.error("Ошибка при начислении валюты:", error);
+                return false;
+            }
+        }
+        
+        // Проверяем параметры URL после возврата с оплаты
+        function checkUrlParams() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const success = urlParams.get('success');
+            const nickname = urlParams.get('nickname');
+            
+            if (success === '1' && nickname) {
+                // Показываем сообщение об успешной оплате
+                showStatus('Оплата прошла успешно! Валюта будет зачислена в течение нескольких минут.', true);
+                
+                // Автоматически заполняем форму никнеймом
+                nicknameInput.value = decodeURIComponent(nickname);
+                
+                // Прокручиваем к сообщению
+                setTimeout(() => {
+                    statusMessage.scrollIntoView({ behavior: 'smooth' });
+                }, 500);
+            }
         }
         
         // Функция для отображения статуса
         function showStatus(message, isSuccess) {
             statusMessage.textContent = message;
             statusMessage.className = isSuccess ? 'status success' : 'status error';
+            statusMessage.style.display = 'block';
         }
         
         // Функция для скрытия статуса
@@ -399,6 +438,9 @@
                 setupPaymentForm();
             }
         });
+        
+        // Проверяем параметры URL при загрузке страницы
+        window.addEventListener('DOMContentLoaded', checkUrlParams);
     </script>
 </body>
 </html>
