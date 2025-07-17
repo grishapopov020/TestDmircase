@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Тестовая оплата через ЮKassa</title>
-    <script src="https://yookassa.ru/checkout-widget/v1/checkout-widget.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -42,9 +41,11 @@
         button:hover {
             background-color: #45a049;
         }
-        #payment-form-container {
+        iframe {
+            width: 100%;
+            height: 500px;
+            border: 1px solid #ddd;
             margin-top: 20px;
-            min-height: 300px;
         }
     </style>
 </head>
@@ -55,19 +56,18 @@
         <h2>Форма оплаты</h2>
         <input type="text" id="amount" placeholder="Сумма (руб)" value="100">
         <input type="text" id="description" placeholder="Описание платежа" value="Тестовый платеж">
-        <button id="payButton">Оплатить</button>
-        <div id="payment-form-container"></div>
+        <button id="payButton">Создать платеж</button>
     </div>
+    
+    <div id="paymentContainer"></div>
     
     <h2>Консоль разработчика</h2>
     <div class="console" id="console"></div>
-    
+
     <script>
         const shopId = 1127389;
         const secretKey = 'test_SH5-gPJFK806Meed0brOXYBGqNhDCVH5MDJ4p2oaN7M';
-        let checkout;
         
-        // Функция для вывода в консоль
         function logToConsole(message) {
             const consoleElement = document.getElementById('console');
             const timestamp = new Date().toLocaleTimeString();
@@ -75,45 +75,7 @@
             consoleElement.scrollTop = consoleElement.scrollHeight;
             console.log(message);
         }
-        
-        // Инициализация ЮKassa
-        async function initializeYooKassa() {
-            try {
-                if (!window.YooMoneyCheckoutWidget) {
-                    throw new Error('SDK ЮKassa не загружен');
-                }
-                
-                checkout = new window.YooMoneyCheckoutWidget({
-                    language: 'ru',
-                    customization: {
-                        colors: {
-                            control_primary: '#00BF96',
-                            background: '#FFFFFF'
-                        }
-                    }
-                });
-                
-                checkout.on('success', (event) => {
-                    logToConsole('Платеж успешен: ' + JSON.stringify(event));
-                });
-                
-                checkout.on('fail', (event) => {
-                    logToConsole('Платеж не удался: ' + JSON.stringify(event));
-                });
-                
-                checkout.on('close', () => {
-                    logToConsole('Форма оплаты закрыта');
-                });
-                
-                logToConsole('ЮKassa инициализирована');
-                return true;
-            } catch (error) {
-                logToConsole('Ошибка инициализации ЮKassa: ' + error);
-                return false;
-            }
-        }
-        
-        // Создание платежа
+
         async function createPayment(amount, description) {
             try {
                 logToConsole(`Создание платежа: ${amount} руб, "${description}"`);
@@ -132,7 +94,8 @@
                         },
                         capture: true,
                         confirmation: {
-                            type: "embedded"
+                            type: "redirect",
+                            return_url: window.location.href
                         },
                         description: description,
                         test: true
@@ -153,36 +116,31 @@
                 return null;
             }
         }
-        
-        // Основная функция инициализации
-        async function init() {
-            logToConsole('Страница загружена');
-            logToConsole(`Используется shopId: ${shopId}`);
+
+        document.getElementById('payButton').addEventListener('click', async function() {
+            const amount = document.getElementById('amount').value;
+            const description = document.getElementById('description').value;
             
-            const initialized = await initializeYooKassa();
-            if (!initialized) return;
+            if (!amount || isNaN(amount)) {
+                logToConsole('Ошибка: Укажите корректную сумму');
+                return;
+            }
             
-            document.getElementById('payButton').addEventListener('click', async function() {
-                const amount = document.getElementById('amount').value;
-                const description = document.getElementById('description').value;
-                
-                if (!amount || isNaN(amount)) {
-                    logToConsole('Ошибка: Укажите корректную сумму');
-                    return;
-                }
-                
-                const payment = await createPayment(amount, description);
-                if (payment && payment.confirmation && payment.confirmation.confirmation_token) {
-                    checkout.render('payment-form-container', payment.confirmation.confirmation_token);
-                    logToConsole('Форма оплаты отображена');
-                } else {
-                    logToConsole('Ошибка: Не получен confirmation_token');
-                }
-            });
-        }
-        
-        // Запуск при загрузке страницы
-        window.addEventListener('load', init);
+            const payment = await createPayment(amount, description);
+            if (payment && payment.confirmation && payment.confirmation.confirmation_url) {
+                // Используем iframe для обхода ограничений домена
+                const iframe = document.createElement('iframe');
+                iframe.src = payment.confirmation.confirmation_url;
+                document.getElementById('paymentContainer').innerHTML = '';
+                document.getElementById('paymentContainer').appendChild(iframe);
+                logToConsole('Платежная форма загружена в iframe');
+            } else {
+                logToConsole('Ошибка: Не удалось получить URL для оплаты');
+            }
+        });
+
+        logToConsole('Страница загружена');
+        logToConsole(`Используется shopId: ${shopId}`);
     </script>
 </body>
 </html>
