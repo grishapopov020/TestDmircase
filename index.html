@@ -76,16 +76,19 @@
             console.log(message);
         }
 
-        async function createPayment(amount, description) {
+        async function createPaymentProxy(amount, description) {
             try {
-                logToConsole(`Создание платежа: ${amount} руб, "${description}"`);
+                // Используем публичный CORS-прокси для тестирования
+                const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+                const apiUrl = 'https://api.yookassa.ru/v3/payments';
                 
-                const response = await fetch('https://api.yookassa.ru/v3/payments', {
+                const response = await fetch(proxyUrl + apiUrl, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': 'Basic ' + btoa(shopId + ':' + secretKey),
-                        'Idempotence-Key': Date.now().toString()
+                        'Idempotence-Key': Date.now().toString(),
+                        'X-Requested-With': 'XMLHttpRequest' // Необходимо для cors-anywhere
                     },
                     body: JSON.stringify({
                         amount: {
@@ -102,18 +105,15 @@
                     })
                 });
                 
-                const data = await response.json();
-                
-                if (data.error) {
-                    logToConsole('Ошибка создания платежа: ' + JSON.stringify(data));
-                    return null;
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 
-                logToConsole('Платеж создан: ' + JSON.stringify(data));
+                const data = await response.json();
                 return data;
             } catch (error) {
-                logToConsole('Ошибка при создании платежа: ' + error);
-                return null;
+                logToConsole('Ошибка в createPaymentProxy: ' + error);
+                throw error;
             }
         }
 
@@ -126,21 +126,33 @@
                 return;
             }
             
-            const payment = await createPayment(amount, description);
-            if (payment && payment.confirmation && payment.confirmation.confirmation_url) {
-                // Используем iframe для обхода ограничений домена
-                const iframe = document.createElement('iframe');
-                iframe.src = payment.confirmation.confirmation_url;
-                document.getElementById('paymentContainer').innerHTML = '';
-                document.getElementById('paymentContainer').appendChild(iframe);
-                logToConsole('Платежная форма загружена в iframe');
-            } else {
-                logToConsole('Ошибка: Не удалось получить URL для оплаты');
+            try {
+                logToConsole(`Создание платежа: ${amount} руб, "${description}"`);
+                const payment = await createPaymentProxy(amount, description);
+                
+                if (payment && payment.confirmation && payment.confirmation.confirmation_url) {
+                    // Открываем платежную форму в iframe
+                    const iframe = document.createElement('iframe');
+                    iframe.src = payment.confirmation.confirmation_url;
+                    document.getElementById('paymentContainer').innerHTML = '';
+                    document.getElementById('paymentContainer').appendChild(iframe);
+                    logToConsole('Платежная форма загружена в iframe');
+                } else {
+                    logToConsole('Ошибка: Не удалось получить URL для оплаты');
+                }
+            } catch (error) {
+                logToConsole('Ошибка при создании платежа: ' + error);
+                
+                // Альтернативный вариант - открыть в новом окне
+                if (error.message.includes('Failed to fetch')) {
+                    logToConsole('Попробуйте нажать кнопку еще раз или разрешите CORS-запросы');
+                }
             }
         });
 
         logToConsole('Страница загружена');
         logToConsole(`Используется shopId: ${shopId}`);
+        logToConsole('Примечание: Для работы требуется разрешить CORS-запросы');
     </script>
 </body>
 </html>
