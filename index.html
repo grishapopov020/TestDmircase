@@ -3,73 +3,402 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Тестирование платежной формы ЮKassa</title>
+    <title>Донат игровой валюты | DmirCase</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Arial', sans-serif;
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
             line-height: 1.6;
+            background-color: #f5f5f5;
+            color: #333;
         }
         .container {
-            background: #f9f9f9;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
         h1 {
-            color: #333;
+            color: #2c3e50;
             text-align: center;
+            margin-bottom: 25px;
         }
-        .instructions {
-            background: #e9f7fe;
-            padding: 15px;
-            border-left: 4px solid #2196F3;
+        .form-group {
             margin-bottom: 20px;
         }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 16px;
+            transition: border 0.3s;
+        }
+        input:focus, select:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+        button {
+            background-color: #27ae60;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            width: 100%;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #2ecc71;
+        }
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 6px;
+            display: none;
+            text-align: center;
+        }
+        .success {
+            background-color: #d5f5e3;
+            color: #27ae60;
+            display: block;
+            border: 1px solid #2ecc71;
+        }
+        .error {
+            background-color: #fadbd8;
+            color: #e74c3c;
+            display: block;
+            border: 1px solid #e74c3c;
+        }
+        .user-info {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #eaf2f8;
+            border-radius: 6px;
+            border: 1px solid #3498db;
+            display: none;
+        }
+        .payment-container {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+            display: none;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
+    <!-- Подключаем Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <!-- Подключаем ЮKassa -->
     <link rel="stylesheet" href="https://yookassa.ru/integration/simplepay/css/yookassa_construct_form.css?v=1.25.0">
 </head>
 <body>
     <div class="container">
-        <h1>Тестирование платежной формы ЮKassa</h1>
+        <h1>Донат игровой валюты DmirCase</h1>
         
-        <div class="instructions">
-            <h3>Инструкция по тестированию:</h3>
-            <ol>
-                <li>Введите сумму платежа в поле ввода</li>
-                <li>Нажмите кнопку "Заплатить"</li>
-                <li>Будет открыта тестовая платежная страница ЮKassa</li>
-                <li>Для тестового платежа используйте карту: <strong>5555 5555 5555 4444</strong></li>
-                <li>Срок действия: <strong>любая будущая дата</strong></li>
-                <li>CVC: <strong>любые 3 цифры</strong></li>
-            </ol>
-            <p>Это тестовая среда, реальные деньги списываться не будут.</p>
+        <div class="form-group">
+            <label for="nickname">Никнейм игрока:</label>
+            <input type="text" id="nickname" placeholder="Введите никнейм из игры" required>
         </div>
         
-        <h2>Платежная форма:</h2>
-        <form class="yoomoney-payment-form" action="https://yookassa.ru/integration/simplepay/payment" method="post" accept-charset="utf-8">
-            <div class="ym-payment-btn-block ym-align-space-between">
-                <div class="ym-input-icon-rub">
-                    <input name="sum" placeholder="0.00" class="ym-input ym-sum-input ym-required-input" type="number" step="any">
-                </div>
-                <button data-text="Заплатить" class="ym-btn-pay ym-result-price">
-                    <span class="ym-text-crop">Заплатить</span> 
-                    <span class="ym-price-output"></span>
-                </button>
-                <img src="https://yookassa.ru/integration/simplepay/img/iokassa-gray.svg?v=1.25.0" class="ym-logo" width="114" height="27" alt="ЮKassa">
-            </div>
-            <input name="shopId" type="hidden" value="1127389">
-        </form>
-        
-        <div style="margin-top: 30px;">
-            <h3>Дополнительная информация:</h3>
-            <p>Это тестовая страница для проверки интеграции платежной формы ЮKassa.</p>
-            <p>Форма использует shopId: <strong>1127389</strong></p>
+        <div class="form-group">
+            <label for="currencyType">Тип валюты:</label>
+            <select id="currencyType">
+                <option value="Gold">Gold</option>
+                <option value="Coin">Coin</option>
+            </select>
         </div>
+        
+        <div class="form-group">
+            <label for="amount">Сумма доната (рубли):</label>
+            <input type="number" id="amount" placeholder="Введите сумму в рублях" min="10" required>
+            <small>Минимальная сумма: 10 рублей</small>
+        </div>
+        
+        <button id="checkUserBtn">Проверить пользователя</button>
+        
+        <div id="userInfo" class="user-info">
+            <h3>Информация о пользователе:</h3>
+            <p><strong>Никнейм:</strong> <span id="infoNickname"></span></p>
+            <p><strong>Уровень:</strong> <span id="infoLevel"></span></p>
+            <p><strong>Gold:</strong> <span id="infoGold"></span></p>
+            <p><strong>Coin:</strong> <span id="infoCoin"></span></p>
+            <p><strong>Открыто кейсов:</strong> <span id="infoCases"></span></p>
+        </div>
+        
+        <div id="paymentContainer" class="payment-container" style="display: none;">
+            <h3>Оплата</h3>
+            <p>После успешной оплаты валюта будет автоматически зачислена на аккаунт.</p>
+            <div id="paymentForm"></div>
+        </div>
+        
+        <div id="loader" class="loader"></div>
+        <div id="statusMessage" class="status"></div>
     </div>
-    
-    <script src="https://yookassa.ru/integration/simplepay/js/yookassa_construct_form.js?v=1.25.0"></script>
+
+    <script>
+        // Инициализация Firebase с вашей базой данных
+        const firebaseConfig = {
+            apiKey: "AIzaSyDzJdJtQmYHn7QY7QY7QY7QY7QY7QY7QY7",
+            authDomain: "dmircase-54552.firebaseapp.com",
+            databaseURL: "https://dmircase-54552-default-rtdb.firebaseio.com",
+            projectId: "dmircase-54552",
+            storageBucket: "dmircase-54552.appspot.com",
+            messagingSenderId: "123456789012",
+            appId: "1:123456789012:web:abcdef1234567890abcdef"
+        };
+        
+        // Инициализируем Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        
+        // Элементы DOM
+        const nicknameInput = document.getElementById('nickname');
+        const currencyTypeSelect = document.getElementById('currencyType');
+        const amountInput = document.getElementById('amount');
+        const checkUserBtn = document.getElementById('checkUserBtn');
+        const userInfoDiv = document.getElementById('userInfo');
+        const paymentContainer = document.getElementById('paymentContainer');
+        const paymentFormDiv = document.getElementById('paymentForm');
+        const statusMessage = document.getElementById('statusMessage');
+        const loader = document.getElementById('loader');
+        
+        // Информационные поля
+        const infoNickname = document.getElementById('infoNickname');
+        const infoLevel = document.getElementById('infoLevel');
+        const infoGold = document.getElementById('infoGold');
+        const infoCoin = document.getElementById('infoCoin');
+        const infoCases = document.getElementById('infoCases');
+        
+        // Текущий выбранный пользователь
+        let currentUserKey = null;
+        
+        // Функция для проверки существования пользователя
+        async function checkUser() {
+            const nickname = nicknameInput.value.trim();
+            
+            if (!nickname) {
+                showStatus('Пожалуйста, введите никнейм', false);
+                return;
+            }
+            
+            showLoader();
+            hideStatus();
+            userInfoDiv.style.display = 'none';
+            paymentContainer.style.display = 'none';
+            
+            try {
+                const snapshot = await database.ref().once('value');
+                const users = snapshot.val();
+                let userFound = false;
+                
+                // Ищем пользователя по никнейму
+                for (const key in users) {
+                    if (users[key] && users[key].Name && users[key].Name.toLowerCase() === nickname.toLowerCase()) {
+                        currentUserKey = key;
+                        displayUserInfo(users[key]);
+                        userFound = true;
+                        break;
+                    }
+                }
+                
+                if (!userFound) {
+                    showStatus('Пользователь с таким никнеймом не найден', false);
+                }
+            } catch (error) {
+                console.error("Ошибка при проверке пользователя:", error);
+                showStatus('Произошла ошибка при поиске пользователя', false);
+            } finally {
+                hideLoader();
+            }
+        }
+        
+        // Функция для отображения информации о пользователе
+        function displayUserInfo(user) {
+            infoNickname.textContent = user.Name || 'Не указан';
+            infoLevel.textContent = user.Lvl || '0';
+            infoGold.textContent = user.Gold || '0';
+            infoCoin.textContent = user.Coin || '0';
+            infoCases.textContent = user['Open cases'] || '0';
+            
+            userInfoDiv.style.display = 'block';
+            paymentContainer.style.display = 'block';
+            setupPaymentForm();
+        }
+        
+        // Функция для настройки платежной формы
+        function setupPaymentForm() {
+            paymentFormDiv.innerHTML = '';
+            
+            const paymentForm = document.createElement('form');
+            paymentForm.className = 'yoomoney-payment-form';
+            paymentForm.action = 'https://yookassa.ru/integration/simplepay/payment';
+            paymentForm.method = 'post';
+            paymentForm.acceptCharset = 'utf-8';
+            
+            // Добавляем дополнительные параметры для идентификации платежа
+            const nickname = document.createElement('input');
+            nickname.type = 'hidden';
+            nickname.name = 'nickname';
+            nickname.value = nicknameInput.value.trim();
+            paymentForm.appendChild(nickname);
+            
+            const currencyType = document.createElement('input');
+            currencyType.type = 'hidden';
+            currencyType.name = 'currencyType';
+            currencyType.value = currencyTypeSelect.value;
+            paymentForm.appendChild(currencyType);
+            
+            const amount = document.createElement('input');
+            amount.type = 'hidden';
+            amount.name = 'amount';
+            amount.value = amountInput.value;
+            paymentForm.appendChild(amount);
+            
+            // Добавляем стандартные элементы формы ЮKassa
+            const paymentBlock = document.createElement('div');
+            paymentBlock.className = 'ym-payment-btn-block ym-align-space-between';
+            
+            const inputDiv = document.createElement('div');
+            inputDiv.className = 'ym-input-icon-rub';
+            
+            const sumInput = document.createElement('input');
+            sumInput.name = 'sum';
+            sumInput.value = amountInput.value;
+            sumInput.className = 'ym-input ym-sum-input ym-required-input';
+            sumInput.type = 'number';
+            sumInput.step = 'any';
+            sumInput.readOnly = true;
+            
+            inputDiv.appendChild(sumInput);
+            paymentBlock.appendChild(inputDiv);
+            
+            const payButton = document.createElement('button');
+            payButton.dataset.text = 'Оплатить';
+            payButton.className = 'ym-btn-pay ym-result-price';
+            
+            const spanText = document.createElement('span');
+            spanText.className = 'ym-text-crop';
+            spanText.textContent = 'Оплатить';
+            
+            const spanPrice = document.createElement('span');
+            spanPrice.className = 'ym-price-output';
+            
+            payButton.appendChild(spanText);
+            payButton.appendChild(spanPrice);
+            
+            paymentBlock.appendChild(payButton);
+            
+            const logo = document.createElement('img');
+            logo.src = 'https://yookassa.ru/integration/simplepay/img/iokassa-gray.svg?v=1.25.0';
+            logo.className = 'ym-logo';
+            logo.width = '114';
+            logo.height = '27';
+            logo.alt = 'ЮKassa';
+            
+            paymentBlock.appendChild(logo);
+            
+            // Добавляем shopId
+            const shopId = document.createElement('input');
+            shopId.type = 'hidden';
+            shopId.name = 'shopId';
+            shopId.value = '1127389';
+            
+            paymentForm.appendChild(paymentBlock);
+            paymentForm.appendChild(shopId);
+            
+            paymentFormDiv.appendChild(paymentForm);
+            
+            // Загружаем скрипт ЮKassa
+            loadYooKassaScript();
+        }
+        
+        // Функция для загрузки скрипта ЮKassa
+        function loadYooKassaScript() {
+            const script = document.createElement('script');
+            script.src = 'https://yookassa.ru/integration/simplepay/js/yookassa_construct_form.js?v=1.25.0';
+            document.body.appendChild(script);
+            
+            // Обработка успешной оплаты
+            script.onload = function() {
+                // Здесь можно добавить обработку успешной оплаты
+                // Например, слушать изменения в базе данных для этого пользователя
+                if (currentUserKey) {
+                    const userRef = database.ref(currentUserKey);
+                    
+                    userRef.on('value', (snapshot) => {
+                        const user = snapshot.val();
+                        if (user) {
+                            infoGold.textContent = user.Gold || '0';
+                            infoCoin.textContent = user.Coin || '0';
+                        }
+                    });
+                }
+            };
+        }
+        
+        // Функция для отображения статуса
+        function showStatus(message, isSuccess) {
+            statusMessage.textContent = message;
+            statusMessage.className = isSuccess ? 'status success' : 'status error';
+        }
+        
+        // Функция для скрытия статуса
+        function hideStatus() {
+            statusMessage.style.display = 'none';
+        }
+        
+        // Функция для показа загрузки
+        function showLoader() {
+            loader.style.display = 'block';
+        }
+        
+        // Функция для скрытия загрузки
+        function hideLoader() {
+            loader.style.display = 'none';
+        }
+        
+        // Обработчик кнопки проверки пользователя
+        checkUserBtn.addEventListener('click', checkUser);
+        
+        // Обработчик изменения типа валюты
+        currencyTypeSelect.addEventListener('change', function() {
+            if (userInfoDiv.style.display === 'block') {
+                setupPaymentForm();
+            }
+        });
+        
+        // Обработчик изменения суммы
+        amountInput.addEventListener('change', function() {
+            if (userInfoDiv.style.display === 'block') {
+                setupPaymentForm();
+            }
+        });
+    </script>
 </body>
 </html>
