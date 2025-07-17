@@ -3,156 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Тестовая оплата через ЮKassa</title>
+    <title>Тестирование платежной формы ЮKassa</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
+            line-height: 1.6;
         }
-        .payment-form {
-            border: 1px solid #ddd;
+        .container {
+            background: #f9f9f9;
             padding: 20px;
             border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .instructions {
+            background: #e9f7fe;
+            padding: 15px;
+            border-left: 4px solid #2196F3;
             margin-bottom: 20px;
         }
-        .console {
-            background-color: #f5f5f5;
-            border: 1px solid #ddd;
-            padding: 15px;
-            border-radius: 8px;
-            height: 200px;
-            overflow-y: auto;
-            font-family: monospace;
-        }
-        input, button {
-            padding: 8px;
-            margin: 5px 0;
-            width: 100%;
-            box-sizing: border-box;
-        }
-        button {
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #45a049;
-        }
-        iframe {
-            width: 100%;
-            height: 500px;
-            border: 1px solid #ddd;
-            margin-top: 20px;
-        }
     </style>
+    <link rel="stylesheet" href="https://yookassa.ru/integration/simplepay/css/yookassa_construct_form.css?v=1.25.0">
 </head>
 <body>
-    <h1>Тестовая оплата через ЮKassa</h1>
-    
-    <div class="payment-form">
-        <h2>Форма оплаты</h2>
-        <input type="text" id="amount" placeholder="Сумма (руб)" value="100">
-        <input type="text" id="description" placeholder="Описание платежа" value="Тестовый платеж">
-        <button id="payButton">Создать платеж</button>
+    <div class="container">
+        <h1>Тестирование платежной формы ЮKassa</h1>
+        
+        <div class="instructions">
+            <h3>Инструкция по тестированию:</h3>
+            <ol>
+                <li>Введите сумму платежа в поле ввода</li>
+                <li>Нажмите кнопку "Заплатить"</li>
+                <li>Будет открыта тестовая платежная страница ЮKassa</li>
+                <li>Для тестового платежа используйте карту: <strong>5555 5555 5555 4444</strong></li>
+                <li>Срок действия: <strong>любая будущая дата</strong></li>
+                <li>CVC: <strong>любые 3 цифры</strong></li>
+            </ol>
+            <p>Это тестовая среда, реальные деньги списываться не будут.</p>
+        </div>
+        
+        <h2>Платежная форма:</h2>
+        <form class="yoomoney-payment-form" action="https://yookassa.ru/integration/simplepay/payment" method="post" accept-charset="utf-8">
+            <div class="ym-payment-btn-block ym-align-space-between">
+                <div class="ym-input-icon-rub">
+                    <input name="sum" placeholder="0.00" class="ym-input ym-sum-input ym-required-input" type="number" step="any">
+                </div>
+                <button data-text="Заплатить" class="ym-btn-pay ym-result-price">
+                    <span class="ym-text-crop">Заплатить</span> 
+                    <span class="ym-price-output"></span>
+                </button>
+                <img src="https://yookassa.ru/integration/simplepay/img/iokassa-gray.svg?v=1.25.0" class="ym-logo" width="114" height="27" alt="ЮKassa">
+            </div>
+            <input name="shopId" type="hidden" value="1127389">
+        </form>
+        
+        <div style="margin-top: 30px;">
+            <h3>Дополнительная информация:</h3>
+            <p>Это тестовая страница для проверки интеграции платежной формы ЮKassa.</p>
+            <p>Форма использует shopId: <strong>1127389</strong></p>
+        </div>
     </div>
     
-    <div id="paymentContainer"></div>
-    
-    <h2>Консоль разработчика</h2>
-    <div class="console" id="console"></div>
-
-    <script>
-        const shopId = 1127389;
-        const secretKey = 'test_SH5-gPJFK806Meed0brOXYBGqNhDCVH5MDJ4p2oaN7M';
-        
-        function logToConsole(message) {
-            const consoleElement = document.getElementById('console');
-            const timestamp = new Date().toLocaleTimeString();
-            consoleElement.innerHTML += `[${timestamp}] ${message}<br>`;
-            consoleElement.scrollTop = consoleElement.scrollHeight;
-            console.log(message);
-        }
-
-        async function createPaymentProxy(amount, description) {
-            try {
-                // Используем публичный CORS-прокси для тестирования
-                const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
-                const apiUrl = 'https://api.yookassa.ru/v3/payments';
-                
-                const response = await fetch(proxyUrl + apiUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Basic ' + btoa(shopId + ':' + secretKey),
-                        'Idempotence-Key': Date.now().toString(),
-                        'X-Requested-With': 'XMLHttpRequest' // Необходимо для cors-anywhere
-                    },
-                    body: JSON.stringify({
-                        amount: {
-                            value: amount,
-                            currency: "RUB"
-                        },
-                        capture: true,
-                        confirmation: {
-                            type: "redirect",
-                            return_url: window.location.href
-                        },
-                        description: description,
-                        test: true
-                    })
-                });
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                
-                const data = await response.json();
-                return data;
-            } catch (error) {
-                logToConsole('Ошибка в createPaymentProxy: ' + error);
-                throw error;
-            }
-        }
-
-        document.getElementById('payButton').addEventListener('click', async function() {
-            const amount = document.getElementById('amount').value;
-            const description = document.getElementById('description').value;
-            
-            if (!amount || isNaN(amount)) {
-                logToConsole('Ошибка: Укажите корректную сумму');
-                return;
-            }
-            
-            try {
-                logToConsole(`Создание платежа: ${amount} руб, "${description}"`);
-                const payment = await createPaymentProxy(amount, description);
-                
-                if (payment && payment.confirmation && payment.confirmation.confirmation_url) {
-                    // Открываем платежную форму в iframe
-                    const iframe = document.createElement('iframe');
-                    iframe.src = payment.confirmation.confirmation_url;
-                    document.getElementById('paymentContainer').innerHTML = '';
-                    document.getElementById('paymentContainer').appendChild(iframe);
-                    logToConsole('Платежная форма загружена в iframe');
-                } else {
-                    logToConsole('Ошибка: Не удалось получить URL для оплаты');
-                }
-            } catch (error) {
-                logToConsole('Ошибка при создании платежа: ' + error);
-                
-                // Альтернативный вариант - открыть в новом окне
-                if (error.message.includes('Failed to fetch')) {
-                    logToConsole('Попробуйте нажать кнопку еще раз или разрешите CORS-запросы');
-                }
-            }
-        });
-
-        logToConsole('Страница загружена');
-        logToConsole(`Используется shopId: ${shopId}`);
-        logToConsole('Примечание: Для работы требуется разрешить CORS-запросы');
-    </script>
+    <script src="https://yookassa.ru/integration/simplepay/js/yookassa_construct_form.js?v=1.25.0"></script>
 </body>
 </html>
