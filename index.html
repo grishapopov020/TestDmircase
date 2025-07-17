@@ -3,106 +3,129 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Тестовая оплата через ЮMoney</title>
+    <title>Тест ЮMoney Касса (Демо-режим)</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            max-width: 800px;
+            max-width: 600px;
             margin: 0 auto;
             padding: 20px;
-            text-align: center;
-            background-color: #f0f0f0;
+            background-color: #f5f5f5;
         }
-        .payment-container {
-            background-color: #fff;
+        .payment-box {
+            background: white;
             border-radius: 10px;
-            padding: 30px;
-            margin-top: 30px;
-            box-shadow: 0 0 15px rgba(0,0,0,0.1);
-            border: 2px dashed #ff5722;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border: 2px solid #FF5722;
         }
-        .yoomoney-button {
-            background-color: #FF5722;
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            font-size: 18px;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-top: 20px;
-            transition: background-color 0.3s;
-        }
-        .yoomoney-button:hover {
-            background-color: #E64A19;
-        }
-        .logo {
-            max-width: 200px;
-            margin-bottom: 20px;
-        }
-        .test-mode-banner {
-            background-color: #FF5722;
+        .demo-banner {
+            background: #FF5722;
             color: white;
             padding: 10px;
             border-radius: 5px;
+            text-align: center;
             margin-bottom: 20px;
             font-weight: bold;
         }
-        input {
-            padding: 8px;
-            margin: 5px 0;
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
             border: 1px solid #ddd;
-            border-radius: 4px;
-            width: 200px;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        button {
+            background: #00C08B;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            width: 100%;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover {
+            background: #00A67C;
+        }
+        .test-cards {
+            margin-top: 25px;
+            padding: 15px;
+            background: #FFF8E1;
+            border-radius: 5px;
+            font-size: 14px;
         }
     </style>
 </head>
 <body>
-    <div class="payment-container">
-        <img src="https://yoomoney.ru/i/shop/i/logo.svg" alt="ЮMoney" class="logo">
-        <div class="test-mode-banner">ТЕСТОВЫЙ РЕЖИМ</div>
-        <h1>Тестовая оплата заказа</h1>
-        <p>Используйте тестовые карты для проверки платежей</p>
+    <div class="payment-box">
+        <div class="demo-banner">ТЕСТОВЫЙ РЕЖИМ (деньги не списываются)</div>
+        
+        <h2>Тестовая оплата</h2>
+        <p>Проверка интеграции ЮMoney Кассы</p>
         
         <form method="POST" action="https://yoomoney.ru/quickpay/confirm.xml">
             <!-- Основные параметры -->
-            <input type="hidden" name="receiver" value="1127389"> <!-- Ваш shopId -->
-            <input type="hidden" name="formcomment" value="Тестовый платеж">
-            <input type="hidden" name="short-dest" value="Тестовый платеж">
+            <input type="hidden" name="receiver" value="1127387">
             <input type="hidden" name="quickpay-form" value="shop">
             <input type="hidden" name="targets" value="Тестовый заказ">
+            <input type="hidden" name="formcomment" value="Тестовая оплата">
+            <input type="hidden" name="short-dest" value="Тестовая оплата">
             
-            <!-- Параметр для тестового режима -->
-            <input type="hidden" name="need-fio" value="false">
-            <input type="hidden" name="need-email" value="false">
-            <input type="hidden" name="need-phone" value="false">
-            <input type="hidden" name="need-address" value="false">
-            
-            <!-- Тестовый режим (demo_mode) -->
+            <!-- Тестовый режим -->
             <input type="hidden" name="demo-mode" value="true">
+            <input type="hidden" name="test_notification" value="test_SH5-gPJFK806Meed0brOXYBGqNhDCVH5MDJ4p2oaN7M">
             
-            <label for="sum">Сумма оплаты (руб):</label><br>
-            <input type="number" name="sum" value="1" min="1" max="1000" required><br><br>
+            <div class="form-group">
+                <label for="sum">Сумма (руб):</label>
+                <input type="number" name="sum" value="1" min="1" required>
+            </div>
             
-            <label for="paymentType">Способ оплаты:</label><br>
-            <select name="paymentType">
-                <option value="AC">Банковская карта</option>
-                <option value="PC">ЮMoney</option>
-                <option value="MC">Мобильный платеж</option>
-            </select><br><br>
+            <div class="form-group">
+                <label for="paymentType">Способ оплаты:</label>
+                <select name="paymentType">
+                    <option value="AC">Банковская карта</option>
+                    <option value="PC">ЮMoney</option>
+                    <option value="MC">Мобильный платеж</option>
+                </select>
+            </div>
             
-            <label for="label">Номер заказа (для теста):</label><br>
-            <input type="text" name="label" value="TEST_ORDER_123"><br><br>
+            <div class="form-group">
+                <label for="label">Номер заказа:</label>
+                <input type="text" name="label" value="TEST_ORDER_<?= rand(1000,9999) ?>">
+            </div>
             
-            <button type="submit" class="yoomoney-button">Протестировать оплату</button>
+            <button type="submit">Проверить оплату</button>
         </form>
         
-        <div style="margin-top: 30px; text-align: left; background: #fff8e1; padding: 15px; border-radius: 5px;">
-            <h3>Тестовые карты для проверки:</h3>
-            <p><strong>Карта для успешного платежа:</strong> 5555 5555 5555 5599 (срок: 12/25, CVV: 123)</p>
-            <p><strong>Карта для отказа:</strong> 5555 5555 5555 5577</p>
-            <p><strong>Карта для 3-D Secure:</strong> 5555 5555 5555 5545</p>
-            <p>Сумма должна быть целым числом (1 рубль и более)</p>
+        <div class="test-cards">
+            <h3>Тестовые карты:</h3>
+            <p><strong>Успешный платеж:</strong> 5555 5555 5555 5599 (срок: 12/25, CVV: 123)</p>
+            <p><strong>Ошибка платежа:</strong> 5555 5555 5555 5577</p>
+            <p><strong>3-D Secure:</strong> 5555 5555 5555 5545</p>
+            <p><em>Деньги не списываются в тестовом режиме</em></p>
         </div>
     </div>
+    
+    <script>
+        // Логирование данных формы (для отладки)
+        document.querySelector('form').addEventListener('submit', function(e) {
+            console.log('Отправка формы:', {
+                receiver: this.receiver.value,
+                sum: this.sum.value,
+                label: this.label.value,
+                demo_mode: this.querySelector('[name="demo-mode"]').value
+            });
+        });
+    </script>
 </body>
 </html>
