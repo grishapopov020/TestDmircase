@@ -153,7 +153,7 @@
         
         <div id="paymentContainer" class="payment-container" style="display: none;">
             <h3>Оплата</h3>
-            <p>После успешной оплаты валюта будет автоматически зачислена на аккаунт.</p>
+            <p>После успешной оплаты валюта будет зачислена после подтверждения администратором.</p>
             <div id="paymentForm"></div>
         </div>
         
@@ -272,17 +272,17 @@
             
             const currencyType = document.createElement('input');
             currencyType.type = 'hidden';
-            currencyType.name = 'currency';
+            currencyType.name = 'currencyType';
             currencyType.value = currencyTypeSelect.value;
             paymentForm.appendChild(currencyType);
             
-            // Добавляем URL для возврата
-            const returnUrl = document.createElement('input');
-            returnUrl.type = 'hidden';
-            returnUrl.name = 'quickpay-form';
-            returnUrl.value = 'shop';
-            paymentForm.appendChild(returnUrl);
+            const amount = document.createElement('input');
+            amount.type = 'hidden';
+            amount.name = 'amount';
+            amount.value = amountInput.value;
+            paymentForm.appendChild(amount);
             
+            // URL для возврата после оплаты
             const successUrl = document.createElement('input');
             successUrl.type = 'hidden';
             successUrl.name = 'successURL';
@@ -352,32 +352,66 @@
             const script = document.createElement('script');
             script.src = 'https://yookassa.ru/integration/simplepay/js/yookassa_construct_form.js?v=1.25.0';
             document.body.appendChild(script);
+            
+            script.onload = function() {
+                // Создаем запись о платеже в Firebase
+                createPaymentRecord();
+            };
         }
         
-        // Функция для начисления валюты
-        async function addCurrency(nickname, currencyType, amount) {
+        // Функция для создания записи о платеже
+        async function createPaymentRecord() {
+            const nickname = nicknameInput.value.trim();
+            const currencyType = currencyTypeSelect.value;
+            const amount = amountInput.value;
+            
+            if (!nickname || !amount) return;
+            
             try {
-                // Находим пользователя в базе
-                const snapshot = await database.ref().once('value');
-                const users = snapshot.val();
+                const paymentData = {
+                    nickname: nickname,
+                    currencyType: currencyType,
+                    amount: parseFloat(amount),
+                    rubAmount: parseFloat(amount),
+                    status: 'pending',
+                    timestamp: firebase.database.ServerValue.TIMESTAMP,
+                    adminConfirmed: false
+                };
                 
-                for (const key in users) {
-                    if (users[key] && users[key].Name && users[key].Name.toLowerCase() === nickname.toLowerCase()) {
-                        // Получаем текущее значение валюты
-                        const currentValue = parseFloat(users[key][currencyType] || 0);
-                        const newValue = currentValue + parseFloat(amount);
-                        
-                        // Обновляем значение в базе данных
-                        await database.ref(key + '/' + currencyType).set(newValue);
-                        
-                        return true;
+                // Добавляем запись в раздел payments
+                const newPaymentRef = database.ref('payments').push();
+                await newPaymentRef.set(paymentData);
+                
+                // Сохраняем ID платежа в localStorage
+                localStorage.setItem('currentPaymentId', newPaymentRef.key);
+                
+                // Слушаем изменения статуса платежа
+                listenForPaymentConfirmation(newPaymentRef.key);
+            } catch (error) {
+                console.error("Ошибка при создании записи о платеже:", error);
+            }
+        }
+        
+        // Функция для отслеживания подтверждения платежа
+        function listenForPaymentConfirmation(paymentId) {
+            const paymentRef = database.ref('payments/' + paymentId);
+            
+            paymentRef.on('value', (snapshot) => {
+                const payment = snapshot.val();
+                if (payment && payment.adminConfirmed) {
+                    showStatus('Платеж подтвержден администратором! Валюта зачислена.', true);
+                    paymentRef.off(); // Отключаем слушатель
+                    localStorage.removeItem('currentPaymentId');
+                    
+                    // Обновляем информацию о пользователе
+                    if (currentUserKey) {
+                        database.ref(currentUserKey).once('value').then((userSnapshot) => {
+                            const user = userSnapshot.val();
+                            if (user) displayUserInfo(user);
+                        });
                     }
                 }
-                return false;
-            } catch (error) {
-                console.error("Ошибка при начислении валюты:", error);
-                return false;
-            }
+            });
         }
         
         // Проверяем параметры URL после возврата с оплаты
@@ -387,16 +421,14 @@
             const nickname = urlParams.get('nickname');
             
             if (success === '1' && nickname) {
-                // Показываем сообщение об успешной оплате
-                showStatus('Оплата прошла успешно! Валюта будет зачислена в течение нескольких минут.', true);
-                
-                // Автоматически заполняем форму никнеймом
+                showStatus('Оплата прошла успешно! Ожидайте подтверждения администратора.', true);
                 nicknameInput.value = decodeURIComponent(nickname);
                 
-                // Прокручиваем к сообщению
-                setTimeout(() => {
-                    statusMessage.scrollIntoView({ behavior: 'smooth' });
-                }, 500);
+                // Проверяем, есть ли сохраненный ID платежа
+                const paymentId = localStorage.getItem('currentPaymentId');
+                if (paymentId) {
+                    listenForPaymentConfirmation(paymentId);
+                }
             }
         }
         
