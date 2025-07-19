@@ -19,6 +19,7 @@
             padding: 25px;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
         }
         h1 {
             color: #2c3e50;
@@ -106,6 +107,22 @@
             margin: 20px auto;
             display: none;
         }
+        footer {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            margin-top: 20px;
+            font-size: 14px;
+            color: #555;
+        }
+        footer h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+        footer p {
+            margin: 5px 0;
+        }
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
@@ -160,6 +177,13 @@
         <div id="loader" class="loader"></div>
         <div id="statusMessage" class="status"></div>
     </div>
+
+    <footer>
+        <h3>Реквизиты и контакты</h3>
+        <p><strong>Самозанятый:</strong> Попов Григорий Владимирович</p>
+        <p><strong>ИНН:</strong>552003168603</p>
+        <p><strong>Электронная почта:</strong> iloverussia55reg@gmail.com</p>
+    </footer>
 
     <script>
         // Инициализация Firebase с вашей базой данных
