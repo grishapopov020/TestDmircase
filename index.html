@@ -5,124 +5,245 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Донат игровой валюты | DmirCase</title>
     <style>
+        :root {
+            --primary-color: #27ae60;
+            --primary-hover: #2ecc71;
+            --dark-bg: #1a1a1a;
+            --darker-bg: #121212;
+            --card-bg: #242424;
+            --text-color: #f0f0f0;
+            --text-muted: #b0b0b0;
+            --border-color: #333;
+            --success-bg: #1e3a2a;
+            --error-bg: #3a1e1e;
+            --info-bg: #1e2a3a;
+        }
+        
         body {
-            font-family: 'Arial', sans-serif;
-            max-width: 800px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 900px;
             margin: 0 auto;
             padding: 20px;
             line-height: 1.6;
-            background-color: #f5f5f5;
-            color: #333;
+            background-color: var(--dark-bg);
+            color: var(--text-color);
         }
+        
         .container {
-            background: white;
-            padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+        }
+        
+        h1, h2, h3 {
+            color: var(--text-color);
             margin-bottom: 20px;
         }
+        
         h1 {
-            color: #2c3e50;
             text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.2rem;
+            background: linear-gradient(90deg, var(--primary-color), #3498db);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .form-group {
             margin-bottom: 25px;
         }
-        .form-group {
-            margin-bottom: 20px;
-        }
+        
         label {
             display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
-            color: #2c3e50;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: var(--text-color);
         }
+        
         input, select {
             width: 100%;
-            padding: 12px;
-            border: 2px solid #ddd;
-            border-radius: 6px;
+            padding: 14px;
+            background-color: var(--darker-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
             box-sizing: border-box;
             font-size: 16px;
-            transition: border 0.3s;
+            transition: all 0.3s;
+            color: var(--text-color);
         }
+        
         input:focus, select:focus {
-            border-color: #3498db;
+            border-color: var(--primary-color);
             outline: none;
+            box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.2);
         }
+        
         button {
-            background-color: #27ae60;
+            background-color: var(--primary-color);
             color: white;
-            padding: 12px 20px;
+            padding: 14px 24px;
             border: none;
-            border-radius: 6px;
+            border-radius: 8px;
             cursor: pointer;
             font-size: 16px;
-            font-weight: bold;
+            font-weight: 600;
             width: 100%;
-            transition: background-color 0.3s;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
+        
         button:hover {
-            background-color: #2ecc71;
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
         }
+        
         .status {
             margin-top: 20px;
             padding: 15px;
-            border-radius: 6px;
+            border-radius: 8px;
             display: none;
             text-align: center;
+            font-weight: 500;
         }
+        
         .success {
-            background-color: #d5f5e3;
+            background-color: var(--success-bg);
             color: #27ae60;
             display: block;
-            border: 1px solid #2ecc71;
+            border: 1px solid #27ae60;
         }
+        
         .error {
-            background-color: #fadbd8;
+            background-color: var(--error-bg);
             color: #e74c3c;
             display: block;
             border: 1px solid #e74c3c;
         }
+        
         .user-info {
-            margin-top: 20px;
-            padding: 15px;
-            background-color: #eaf2f8;
-            border-radius: 6px;
+            margin-top: 25px;
+            padding: 20px;
+            background-color: var(--info-bg);
+            border-radius: 10px;
             border: 1px solid #3498db;
             display: none;
         }
+        
         .payment-container {
-            margin-top: 20px;
-            padding: 20px;
-            background-color: #f9f9f9;
-            border-radius: 8px;
-            border: 1px solid #ddd;
+            margin-top: 25px;
+            padding: 25px;
+            background-color: var(--darker-bg);
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
         }
+        
         .loader {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #3498db;
+            border: 4px solid var(--border-color);
+            border-top: 4px solid var(--primary-color);
             border-radius: 50%;
-            width: 30px;
-            height: 30px;
+            width: 40px;
+            height: 40px;
             animation: spin 1s linear infinite;
-            margin: 20px auto;
+            margin: 30px auto;
             display: none;
         }
+        
         footer {
-            background: white;
-            padding: 20px;
+            background: var(--card-bg);
+            padding: 25px;
             border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            margin-top: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            margin-top: 30px;
             font-size: 14px;
-            color: #555;
+            color: var(--text-muted);
+            border: 1px solid var(--border-color);
         }
+        
         footer h3 {
-            color: #2c3e50;
+            color: var(--text-color);
             margin-bottom: 15px;
+            font-size: 1.2rem;
         }
+        
         footer p {
-            margin: 5px 0;
+            margin: 8px 0;
         }
+        
+        .product-description {
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: var(--darker-bg);
+            border-radius: 10px;
+            border-left: 4px solid var(--primary-color);
+        }
+        
+        .product-description h2 {
+            margin-top: 0;
+            color: var(--primary-color);
+        }
+        
+        .product-description ul {
+            padding-left: 20px;
+        }
+        
+        .product-description li {
+            margin-bottom: 8px;
+        }
+        
+        .currency-option {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 15px;
+            background-color: var(--darker-bg);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s;
+        }
+        
+        .currency-option:hover {
+            border-color: var(--primary-color);
+            transform: translateX(5px);
+        }
+        
+        .currency-icon {
+            width: 40px;
+            height: 40px;
+            margin-right: 15px;
+            background-color: var(--primary-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+        }
+        
+        .currency-details {
+            flex: 1;
+        }
+        
+        .currency-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .currency-rate {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+        
+        small {
+            display: block;
+            margin-top: 8px;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+        
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
@@ -138,14 +259,45 @@
     <div class="container">
         <h1>Донат игровой валюты DmirCase</h1>
         
-        <div class="form-group">
-            <label for="nickname">Никнейм игрока:</label>
-            <input type="text" id="nickname" placeholder="Введите никнейм из игры" required>
+        <div class="product-description">
+            <h2>О наших услугах</h2>
+            <p>Мы предлагаем покупку игровой валюты для вашего удобства в игре DmirCase. Приобретая валюту у нас, вы получаете:</p>
+            <ul>
+                <li>Мгновенное зачисление после подтверждения платежа</li>
+                <li>Гарантированное получение купленной валюты</li>
+                <li>Безопасные платежи через ЮKassa</li>
+                <li>Поддержку 24/7 по всем вопросам</li>
+            </ul>
+            <p>Все платежи обрабатываются официально с предоставлением чека. Минимальная сумма платежа - 10 рублей.</p>
         </div>
         
         <div class="form-group">
-            <label for="currencyType">Тип валюты:</label>
-            <select id="currencyType">
+            <label for="nickname">Никнейм игрока:</label>
+            <input type="text" id="nickname" placeholder="Введите ваш никнейм в игре" required>
+        </div>
+        
+        <div class="form-group">
+            <label>Выберите тип валюты:</label>
+            
+            <div class="currency-option" onclick="selectCurrency('Gold')">
+                <div class="currency-icon">G</div>
+                <div class="currency-details">
+                    <div class="currency-name">Gold</div>
+                    <div class="currency-rate">1 рубль = 1 Gold</div>
+                    <small>Премиальная валюта для покупки эксклюзивных предметов</small>
+                </div>
+            </div>
+            
+            <div class="currency-option" onclick="selectCurrency('Coin')">
+                <div class="currency-icon">C</div>
+                <div class="currency-details">
+                    <div class="currency-name">Coin</div>
+                    <div class="currency-rate">1 рубль = 10 Coin</div>
+                    <small>Основная валюта для обычных покупок в игре</small>
+                </div>
+            </div>
+            
+            <select id="currencyType" style="display: none;">
                 <option value="Gold">Gold</option>
                 <option value="Coin">Coin</option>
             </select>
@@ -153,8 +305,8 @@
         
         <div class="form-group">
             <label for="amount">Сумма доната (рубли):</label>
-            <input type="number" id="amount" placeholder="Введите сумму в рублях" min="10" required>
-            <small>Минимальная сумма: 10 рублей</small>
+            <input type="number" id="amount" placeholder="Введите сумму от 10 рублей" min="10" required>
+            <small>Минимальная сумма: 10 рублей. Введите целое число.</small>
         </div>
         
         <button id="checkUserBtn">Проверить пользователя</button>
@@ -170,7 +322,7 @@
         
         <div id="paymentContainer" class="payment-container" style="display: none;">
             <h3>Оплата</h3>
-            <p>После успешной оплаты валюта будет зачислена после подтверждения администратором.</p>
+            <p>После успешной оплаты валюта будет зачислена на ваш игровой аккаунт в течение 15 минут. В случае задержки, пожалуйста, свяжитесь с поддержкой.</p>
             <div id="paymentForm"></div>
         </div>
         
@@ -181,8 +333,10 @@
     <footer>
         <h3>Реквизиты и контакты</h3>
         <p><strong>Самозанятый:</strong> Попов Григорий Владимирович</p>
-        <p><strong>ИНН:</strong>552003168603</p>
+        <p><strong>ИНН:</strong> 552003168603</p>
         <p><strong>Электронная почта:</strong> iloverussia55reg@gmail.com</p>
+        <p><strong>Телефон поддержки:</strong> +7 (XXX) XXX-XX-XX</p>
+        <p><strong>Время работы поддержки:</strong> Круглосуточно, 7 дней в неделю</p>
     </footer>
 
     <script>
@@ -223,12 +377,32 @@
         let currentUserKey = null;
         let currentUserData = null;
         
+        // Функция для выбора валюты
+        function selectCurrency(currency) {
+            currencyTypeSelect.value = currency;
+            const options = document.querySelectorAll('.currency-option');
+            options.forEach(opt => {
+                opt.style.borderColor = opt.querySelector('.currency-name').textContent === currency 
+                    ? 'var(--primary-color)' 
+                    : 'var(--border-color)';
+            });
+            
+            if (userInfoDiv.style.display === 'block') {
+                setupPaymentForm();
+            }
+        }
+        
         // Функция для проверки существования пользователя
         async function checkUser() {
             const nickname = nicknameInput.value.trim();
             
             if (!nickname) {
                 showStatus('Пожалуйста, введите никнейм', false);
+                return;
+            }
+            
+            if (!amountInput.value || parseFloat(amountInput.value) < 10) {
+                showStatus('Минимальная сумма платежа - 10 рублей', false);
                 return;
             }
             
@@ -254,11 +428,11 @@
                 }
                 
                 if (!userFound) {
-                    showStatus('Пользователь с таким никнеймом не найден', false);
+                    showStatus('Пользователь с таким никнеймом не найден. Проверьте правильность ввода.', false);
                 }
             } catch (error) {
                 console.error("Ошибка при проверке пользователя:", error);
-                showStatus('Произошла ошибка при поиске пользователя', false);
+                showStatus('Произошла ошибка при поиске пользователя. Попробуйте позже.', false);
             } finally {
                 hideLoader();
             }
@@ -275,6 +449,10 @@
             userInfoDiv.style.display = 'block';
             paymentContainer.style.display = 'block';
             setupPaymentForm();
+            
+            // Показываем курс валюты
+            const rate = currencyTypeSelect.value === 'Gold' ? '1 рубль = 1 Gold' : '1 рубль = 10 Coin';
+            showStatus(`Текущий курс: ${rate}. После оплаты валюта будет зачислена автоматически.`, true);
         }
         
         // Функция для настройки платежной формы
@@ -399,7 +577,8 @@
                     rubAmount: parseFloat(amount),
                     status: 'pending',
                     timestamp: firebase.database.ServerValue.TIMESTAMP,
-                    adminConfirmed: false
+                    adminConfirmed: false,
+                    currencyRate: currencyType === 'Gold' ? '1:1' : '1:10'
                 };
                 
                 // Добавляем запись в раздел payments
@@ -413,6 +592,7 @@
                 listenForPaymentConfirmation(newPaymentRef.key);
             } catch (error) {
                 console.error("Ошибка при создании записи о платеже:", error);
+                showStatus('Ошибка при создании платежа. Попробуйте позже.', false);
             }
         }
         
@@ -423,7 +603,7 @@
             paymentRef.on('value', (snapshot) => {
                 const payment = snapshot.val();
                 if (payment && payment.adminConfirmed) {
-                    showStatus('Платеж подтвержден администратором! Валюта зачислена.', true);
+                    showStatus('Платеж подтвержден администратором! Валюта зачислена на ваш аккаунт.', true);
                     paymentRef.off(); // Отключаем слушатель
                     localStorage.removeItem('currentPaymentId');
                     
@@ -445,7 +625,7 @@
             const nickname = urlParams.get('nickname');
             
             if (success === '1' && nickname) {
-                showStatus('Оплата прошла успешно! Ожидайте подтверждения администратора.', true);
+                showStatus('Оплата прошла успешно! Ожидайте подтверждения администратора (обычно до 15 минут).', true);
                 nicknameInput.value = decodeURIComponent(nickname);
                 
                 // Проверяем, есть ли сохраненный ID платежа
@@ -481,19 +661,15 @@
         // Обработчик кнопки проверки пользователя
         checkUserBtn.addEventListener('click', checkUser);
         
-        // Обработчик изменения типа валюты
-        currencyTypeSelect.addEventListener('change', function() {
-            if (userInfoDiv.style.display === 'block') {
-                setupPaymentForm();
-            }
-        });
-        
         // Обработчик изменения суммы
         amountInput.addEventListener('change', function() {
             if (userInfoDiv.style.display === 'block') {
                 setupPaymentForm();
             }
         });
+        
+        // Инициализация выбора валюты
+        selectCurrency('Gold');
         
         // Проверяем параметры URL при загрузке страницы
         window.addEventListener('DOMContentLoaded', checkUrlParams);
